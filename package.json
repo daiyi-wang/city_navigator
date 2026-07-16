@@ -1,0 +1,10 @@
+{
+  "name": "city-navigator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "python scripts/serve.py",
+    "test": "node tests/core.test.js"
+  }
+}
