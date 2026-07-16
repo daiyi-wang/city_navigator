@@ -1,9 +1,9 @@
 const step = (instruction, action, direction, extra = {}) => ({ instruction, intent: { action, direction, ...extra } });
 
 export const missions = [
-  { id:'l1-01', mode:'listening', level:1, title:'First turn', startNodeId:'n00', startFacing:'east', destinationNodeId:'n10', steps:[step('Go straight.','move','straight')] },
-  { id:'l1-02', mode:'listening', level:1, title:'Face the park', startNodeId:'n10', startFacing:'east', destinationNodeId:'n10', steps:[step('Turn left.','turn','left')] },
-  { id:'l1-03', mode:'listening', level:1, title:'Right at school', startNodeId:'n10', startFacing:'east', destinationNodeId:'n10', steps:[step('Turn right.','turn','right')] },
+  { id:'l1-01', mode:'listening', level:1, title:'First move', startNodeId:'n00', startFacing:'east', destinationNodeId:'n10', steps:[step('Go straight.','move','straight')] },
+  { id:'l1-02', mode:'listening', level:1, title:'Face north', startNodeId:'n10', startFacing:'east', targetFacing:'north', destinationNodeId:'n10', steps:[step('Turn left.','turn','left')] },
+  { id:'l1-03', mode:'listening', level:1, title:'Face south', startNodeId:'n10', startFacing:'east', targetFacing:'south', destinationNodeId:'n10', steps:[step('Turn right.','turn','right')] },
   { id:'l1-04', mode:'listening', level:1, title:'Safe stop', startNodeId:'n30', startFacing:'south', destinationNodeId:'n30', steps:[step('Stop.','stop','stop')] },
   { id:'l2-01', mode:'listening', level:2, title:'Traffic-light turn', startNodeId:'n10', startFacing:'east', destinationNodeId:'n10', steps:[step('Turn right at the traffic light.','turn','right',{landmarkType:'trafficLight'})] },
   { id:'l2-02', mode:'listening', level:2, title:'Stop-sign turn', startNodeId:'n02', startFacing:'south', destinationNodeId:'n02', steps:[step('Turn left at the stop sign.','turn','left',{landmarkType:'stopSign'})] },

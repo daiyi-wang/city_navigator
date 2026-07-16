@@ -19,7 +19,7 @@ const recognition=new SpeechRecognitionService();
 const SETTINGS_KEY='cityNavigator.settings.v1';
 const defaultSettings={speed:'slow',sound:true,music:false,autoPlay:true,replays:'2',captions:false,speechEnabled:true,animation:'normal',tutorialSeen:false};
 const loadSettings=()=>{try{return {...defaultSettings,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')};}catch{return {...defaultSettings};}};
-const state={screen:'home',mode:null,level:1,mission:null,session:[],sessionIndex:0,stepIndex:0,settings:loadSettings(),feedback:null,hintLevel:0,showCaption:false,transcript:'',listening:false,busy:false,moving:false,visitedSegments:[],sessionResults:[],tutorialStep:0,returnScreen:'home'};
+const state={screen:'home',mode:null,level:1,mission:null,session:[],sessionIndex:0,stepIndex:0,settings:loadSettings(),feedback:null,hintLevel:0,showCaption:false,transcript:'',listening:false,busy:false,moving:false,missionComplete:false,visitedSegments:[],sessionResults:[],tutorialStep:0,returnScreen:'home'};
 
 const escapeHTML=value=>String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
 const announce=text=>{announcer.textContent='';setTimeout(()=>{announcer.textContent=text;},20);};
@@ -28,7 +28,7 @@ saveSettings();
 
 function topbar(){
   const playing=state.screen==='game';
-  return `<header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true">➤</span><div><strong>City Navigator</strong><small>Listen, Speak, and Find the Way!</small></div></div>${playing?`<span class="status-pill">${state.mode==='speaking'?'Speaking':'Listening'} Mode</span><span class="status-pill">Level ${state.level} · ${state.sessionIndex+1}/${state.session.length}</span><span class="status-pill" aria-label="目前星級">${'★'.repeat(scorer.stars())}</span>`:''}<button class="icon-btn" data-action="open-settings" aria-label="開啟設定">⚙ Settings</button>${state.screen!=='home'?'<button class="text-btn" data-action="home">⌂ Home</button>':''}</header>`;
+  return `<header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true">➤</span><div><strong>City Navigator</strong><small>Listen, Speak, and Find the Way!</small></div></div>${playing?`<span class="status-pill">${state.mode==='speaking'?'Speaking':'Listening'} Mode</span><span class="status-pill">Level ${state.level} · Mission ${state.sessionIndex+1} of ${state.session.length}</span><span class="status-pill" aria-label="目前星級">${'★'.repeat(scorer.stars())}</span>`:''}<button class="icon-btn" data-action="open-settings" aria-label="開啟設定">⚙ Settings</button>${state.screen!=='home'?'<button class="text-btn" data-action="home">⌂ Home</button>':''}</header>`;
 }
 
 function render(){
@@ -39,7 +39,7 @@ function render(){
   if(state.screen==='results')content=resultsView();
   if(state.screen==='progress')content=progressView();
   if(state.screen==='settings')content=settingsView();
-  app.innerHTML=`<div class="shell">${topbar()}${content}</div>${state.screen==='tutorial'?tutorialModal():''}`;
+  app.innerHTML=`<div class="shell">${topbar()}${content}</div>${state.screen==='tutorial'?tutorialModal():''}${state.missionComplete?missionCompleteModal():''}`;
   bindEvents();
 }
 
@@ -74,13 +74,14 @@ function mapView(){
   const current=route.node(character.currentNodeId);
   const start=route.node(state.mission.startNodeId);
   const destination=route.node(state.mission.destinationNodeId);
+  const showDestination=state.mission.mode==='findPlace'||state.mission.steps?.some(item=>item.intent.action==='move');
   const angle={north:0,east:90,south:180,west:270}[character.facing];
   const hRoads=[17,39,61,83].map(y=>`<div class="road h" style="top:${y}%"></div>`).join('');
   const vRoads=[14,38,62,86].map(x=>`<div class="road v" style="left:${x}%"></div>`).join('');
   const nodes=cityMap.nodes.map(node=>`<span class="node" style="left:${node.x}%;top:${node.y}%" aria-hidden="true"></span>${node.landmark?`<span class="landmark" style="left:${node.x+2}%;top:${node.y-3}%" title="${node.landmark}">${node.landmark==='trafficLight'?'🚦':'🛑'}</span>`:''}`).join('');
   const places=cityMap.places.map(place=>`<button class="place ${state.mission.mode==='findPlace'?'selectable':''} ${place.id===state.mission.targetPlaceId&&state.feedback?.type==='success'?'target':''}" style="left:${place.x===4?6.5:place.x+8}%;top:${place.y===4?5.5:place.y+4}%;--place-color:${place.color}" data-place="${place.id}" aria-label="${place.name}" ${state.mission.mode==='findPlace'?'':`tabindex="-1" aria-hidden="true"`}><span class="place-icon">${buildingIcon(place.id)}</span><span class="place-name">${place.name}</span></button>`).join('');
   const segments=state.visitedSegments.map(segment=>{const a=route.node(segment.from),b=route.node(segment.to);const dx=b.x-a.x,dy=b.y-a.y;const length=Math.sqrt(dx*dx+dy*dy);const angle=Math.atan2(dy,dx)*180/Math.PI;return `<span class="route-segment" style="left:${a.x}%;top:${a.y}%;width:${length}%;transform:rotate(${angle}deg)"></span>`;}).join('');
-  return `<section class="map-card"><div class="map-header"><h2>Sunny Town</h2><span class="compass">N ↑ · Facing ${character.facing}</span></div><div class="city-map" aria-label="Sunny Town 城市地圖，人物目前面向 ${character.facing}">${hRoads}${vRoads}${nodes}${places}${segments}<span class="start-marker" style="left:${start.x}%;top:${start.y}%">START</span><span class="destination-marker" style="left:${destination.x}%;top:${destination.y}%">GOAL</span><div class="character ${state.moving?'walking':''} ${state.feedback?.type==='success'?'success':''}" style="left:${current.x}%;top:${current.y}%" aria-label="人物位於 ${current.id}，面向 ${character.facing}"><div class="character-body" style="transform:rotate(${angle}deg)">☺</div></div></div></section>`;
+  return `<section class="map-card"><div class="map-header"><h2>Sunny Town</h2><span class="compass">N ↑ · Facing ${character.facing}${state.mission.targetFacing?` · Target ${state.mission.targetFacing}`:''}</span></div><div class="city-map" aria-label="Sunny Town 城市地圖，人物目前面向 ${character.facing}">${hRoads}${vRoads}${nodes}${places}${segments}<span class="start-marker" style="left:${start.x}%;top:${start.y}%">START</span>${showDestination?`<span class="destination-marker" style="left:${destination.x}%;top:${destination.y}%">GOAL</span>`:''}<div class="character ${state.moving?'walking':''} ${state.feedback?.type==='success'&&!state.missionComplete?'success':''}" style="left:${current.x}%;top:${current.y}%" aria-label="人物位於 ${current.id}，面向 ${character.facing}"><div class="character-body" style="transform:rotate(${angle}deg)">☺</div></div></div></section>`;
 }
 
 function feedbackView(){
@@ -108,6 +109,13 @@ function resultsView(){
   return `<section class="panel-screen"><span class="eyebrow" style="color:var(--teal)">Route complete</span><h1 class="screen-title">Great job!</h1><p class="screen-lead">You completed ${results.length} mission${results.length===1?'':'s'}.</p><div class="result-stars" aria-label="獲得 ${totalStars} 顆星">${'★'.repeat(totalStars)}${'☆'.repeat(Math.max(0,results.length*3-totalStars))}</div><div class="stats-grid"><div class="stat"><strong>${results.length}</strong><span>Missions</span></div><div class="stat"><strong>${total?Math.round(correct/total*100):100}%</strong><span>${state.mode==='speaking'?'Speaking':'Listening'} Accuracy</span></div><div class="stat"><strong>${hints}</strong><span>Hints Used</span></div><div class="stat"><strong>${replays}</strong><span>Listen Again</span></div><div class="stat"><strong>${totalStars}</strong><span>Total Stars</span></div></div><h2>You need more practice with:</h2>${mistakes.length?`<ul class="mistake-list">${mistakes.map(item=>`<li>${escapeHTML(item)}</li>`).join('')}</ul>`:'<p>No mistakes this time. Excellent navigation!</p>'}<div class="button-row"><button class="secondary-btn" data-action="practice">Practice Mistakes</button><button class="secondary-btn" data-action="play-again">Play Again</button><button class="primary-btn" data-action="home">Back to Home</button></div></section>`;
 }
 
+function missionCompleteModal(){
+  const next=state.session[state.sessionIndex+1];
+  const result=state.sessionResults[state.sessionResults.length-1];
+  const outcome=state.mission.targetFacing?`Now facing ${character.facing}.`:`You reached the goal.`;
+  return `<div class="modal-backdrop"><section class="modal mission-complete-modal" role="dialog" aria-modal="true" aria-labelledby="mission-complete-title"><div class="mission-complete-badge" aria-hidden="true">✓</div><span class="eyebrow" style="color:var(--teal)">Mission ${state.sessionIndex+1} complete</span><h1 id="mission-complete-title" class="screen-title">Great navigation!</h1><p class="screen-lead">${outcome} You earned ${result?.stars||1} star${result?.stars===1?'':'s'}.</p><div class="next-mission-preview"><span>Up next</span><strong>${escapeHTML(next?.title||'Route complete')}</strong></div><div class="button-row"><button class="secondary-btn" data-action="home">End Session</button><button class="primary-btn" data-action="next-mission">Next Mission</button></div></section></div>`;
+}
+
 function progressView(){
   const data=storage.load();const listening=data.listening.total?Math.round(data.listening.correct/data.listening.total*100):0;const speaking=data.speaking.total?Math.round(data.speaking.correct/data.speaking.total*100):0;const mistakes=Object.entries(data.wrongPatterns).sort((a,b)=>b[1]-a[1]);
   return `<section class="panel-screen"><span class="eyebrow" style="color:var(--teal)">Learning record</span><h1 class="screen-title">Your progress</h1><p class="screen-lead">每一次導航，都讓你的方向英語更可靠。</p><div class="stats-grid"><div class="stat"><strong>${data.completedMissions.length}</strong><span>Completed Missions</span></div><div class="stat"><strong>${data.totalStars}</strong><span>Total Stars</span></div><div class="stat"><strong>${listening}%</strong><span>Listening Accuracy</span></div><div class="stat"><strong>${speaking}%</strong><span>Speaking Accuracy</span></div></div><h2>Practice focus</h2>${mistakes.length?`<div class="progress-list">${mistakes.map(([phrase,count])=>`<div class="progress-row"><span>${escapeHTML(phrase)}</span><strong>${count}×</strong></div>`).join('')}</div>`:'<div class="empty">完成一些任務後，系統會在這裡整理需要加強的句型。</div>'}<div class="button-row"><button class="secondary-btn" data-action="practice">Practice Mistakes</button><button class="primary-btn" data-action="home">Back to Home</button></div></section>`;
@@ -128,7 +136,7 @@ function tutorialModal(){const page=tutorialPages[state.tutorialStep];return `<d
 
 function selectMode(mode){state.mode=mode;if(mode==='speaking'&&!state.settings.speechEnabled){state.returnScreen='home';state.screen='settings';render();return;}state.screen='modeSelection';render();}
 function startSession(level,customMissions=null){state.level=level;let pool=customMissions||missions.filter(item=>item.level===level&&(state.mode==='speaking'?item.mode==='speaking':item.mode!=='speaking'));state.session=pool.slice(0,3);if(!state.session.length){state.screen='home';render();return;}state.sessionIndex=0;state.sessionResults=[];state.screen='game';loadMission();}
-function loadMission(){state.mission=state.session[state.sessionIndex];state.stepIndex=0;state.feedback=null;state.hintLevel=0;state.showCaption=false;state.transcript='';state.busy=false;state.moving=false;state.visitedSegments=[];scorer.reset();character.reset(state.mission.startNodeId,state.mission.startFacing);render();if(state.settings.autoPlay&&state.mission.mode!=='findPlace')setTimeout(()=>playInstruction(false),250);}
+function loadMission(){state.mission=state.session[state.sessionIndex];state.stepIndex=0;state.feedback=null;state.hintLevel=0;state.showCaption=false;state.transcript='';state.busy=false;state.moving=false;state.missionComplete=false;state.visitedSegments=[];scorer.reset();character.reset(state.mission.startNodeId,state.mission.startFacing);render();if(state.settings.autoPlay&&state.mission.mode!=='findPlace')setTimeout(()=>playInstruction(false),250);}
 function intentsMatch(actual,expected){return actual&&actual.action===expected.action&&(expected.direction?actual.direction===expected.direction:true);}
 
 function animateCharacterPath(nodeIds,duration){
@@ -178,7 +186,7 @@ function showHint(){scorer.hints+=1;state.hintLevel=Math.min(4,state.hintLevel+1
 
 async function listen(){if(!recognition.supported()){state.feedback={type:'error',title:'Microphone unavailable',message:'Use the direction buttons instead.'};scorer.usedFallback=true;render();return;}state.listening=true;state.feedback={type:'success',title:'Listening…',message:'Say one direction in English.'};render();try{const text=await recognition.listen();state.listening=false;state.transcript=text;const intent=parser.parse(text);if(!intent){state.feedback={type:'error',title:'I couldn’t hear you clearly.',message:'Please try again. You can also use the buttons.'};render();return;}handleCommand(intent,false);}catch(error){state.listening=false;state.feedback={type:'error',title:'I couldn’t hear you clearly.',message:'Please try again, or use the buttons instead.'};render();}}
 function completeMission(){
-  const mission=state.mission;const expectedTotal=mission.steps?.length||1;const result={id:mission.id,mode:mission.mode==='speaking'?'speaking':'listening',stars:scorer.stars(),correct:expectedTotal,total:expectedTotal+scorer.errors,hints:scorer.hints,replays:scorer.replays,mistakes:scorer.errors||scorer.hints>=4?[mission.instruction||mission.steps?.[Math.min(state.stepIndex,mission.steps.length-1)]?.instruction||mission.title]:[]};storage.record(result);state.sessionResults.push(result);if(state.sessionIndex<state.session.length-1){state.sessionIndex+=1;loadMission();}else{state.screen='results';render();announce('Great job! Route complete.');}}
+  const mission=state.mission;const expectedTotal=mission.steps?.length||1;const result={id:mission.id,mode:mission.mode==='speaking'?'speaking':'listening',stars:scorer.stars(),correct:expectedTotal,total:expectedTotal+scorer.errors,hints:scorer.hints,replays:scorer.replays,mistakes:scorer.errors||scorer.hints>=4?[mission.instruction||mission.steps?.[Math.min(state.stepIndex,mission.steps.length-1)]?.instruction||mission.title]:[]};storage.record(result);state.sessionResults.push(result);if(state.sessionIndex<state.session.length-1){state.missionComplete=true;render();announce(`Mission ${state.sessionIndex+1} complete. ${mission.targetFacing?`Now facing ${character.facing}.`:'You reached the goal.'}`);}else{state.screen='results';render();announce('Great job! Route complete.');}}
 function practiceMistakes(){const data=storage.load();const phrases=Object.keys(data.wrongPatterns);const pool=missions.filter(m=>phrases.some(phrase=>m.instruction===phrase||m.steps?.some(s=>s.instruction===phrase)));if(!pool.length){state.feedback=null;state.screen='home';render();announce('No mistakes to practice yet.');return;}state.mode=pool[0].mode==='speaking'?'speaking':'listening';startSession(pool[0].level,pool.slice(0,3));}
 function playTone(success){if(!state.settings.sound)return;try{const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext)return;const ctx=new AudioContext();const osc=ctx.createOscillator(),gain=ctx.createGain();osc.frequency.value=success?660:260;gain.gain.setValueAtTime(.06,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.16);osc.connect(gain).connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+.16);}catch{}}
 
@@ -192,7 +200,7 @@ function bindEvents(){
   document.querySelectorAll('[data-action]').forEach(button=>button.addEventListener('click',()=>action(button.dataset.action)));
 }
 function action(name){
-  if(name==='home'){recognition.stop();state.screen='home';render();}
+  if(name==='home'){recognition.stop();state.missionComplete=false;state.screen='home';render();}
   if(name==='open-settings'){state.returnScreen=state.screen;state.screen='settings';render();}
   if(name==='settings-done'){state.screen=state.returnScreen==='settings'?'home':state.returnScreen;render();}
   if(name==='progress'){state.screen='progress';render();}
@@ -202,6 +210,7 @@ function action(name){
   if(name==='hint')showHint();
   if(name==='listen')listen();
   if(name==='play-again')startSession(state.level);
+  if(name==='next-mission'){state.sessionIndex+=1;loadMission();}
   if(name==='tutorial'){state.returnScreen=state.screen;state.screen='tutorial';state.tutorialStep=0;render();}
   if(name==='skip-tutorial'||name==='next-tutorial'&&state.tutorialStep===tutorialPages.length-1){state.settings.tutorialSeen=true;saveSettings();state.screen=state.returnScreen==='tutorial'?'home':state.returnScreen;render();}
   else if(name==='next-tutorial'){state.tutorialStep+=1;render();}
