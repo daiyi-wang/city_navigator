@@ -1,16 +1,16 @@
 const step = (instruction, action, direction, extra = {}) => ({ instruction, intent: { action, direction, ...extra } });
 
 export const missions = [
-  { id:'l1-01', mode:'listening', level:1, title:'First move', startNodeId:'n00', startFacing:'east', destinationNodeId:'n10', steps:[step('Go straight.','move','straight')] },
-  { id:'l1-02', mode:'listening', level:1, title:'Face north', startNodeId:'n10', startFacing:'east', targetFacing:'north', destinationNodeId:'n10', steps:[step('Turn left.','turn','left')] },
-  { id:'l1-03', mode:'listening', level:1, title:'Face south', startNodeId:'n10', startFacing:'east', targetFacing:'south', destinationNodeId:'n10', steps:[step('Turn right.','turn','right')] },
+  { id:'l1-01', mode:'listening', level:1, title:'First move', startNodeId:'n11', startFacing:'east', destinationNodeId:'n21', steps:[step('Go straight.','move','straight')] },
+  { id:'l1-02', mode:'listening', level:1, title:'Turn north', startNodeId:'n11', startFacing:'east', targetFacing:'north', destinationNodeId:'n10', steps:[step('Turn left.','turn','left'),step('Go straight.','move','straight')] },
+  { id:'l1-03', mode:'listening', level:1, title:'Turn south', startNodeId:'n11', startFacing:'east', targetFacing:'south', destinationNodeId:'n12', steps:[step('Turn right.','turn','right'),step('Go straight.','move','straight')] },
   { id:'l1-04', mode:'listening', level:1, title:'Safe stop', startNodeId:'n30', startFacing:'south', destinationNodeId:'n30', steps:[step('Stop.','stop','stop')] },
   { id:'l2-01', mode:'listening', level:2, title:'Traffic-light turn', startNodeId:'n10', startFacing:'east', destinationNodeId:'n10', steps:[step('Turn right at the traffic light.','turn','right',{landmarkType:'trafficLight'})] },
   { id:'l2-02', mode:'listening', level:2, title:'Stop-sign turn', startNodeId:'n02', startFacing:'south', destinationNodeId:'n02', steps:[step('Turn left at the stop sign.','turn','left',{landmarkType:'stopSign'})] },
   { id:'l2-03', mode:'listening', level:2, title:'Stop at the sign', startNodeId:'n13', startFacing:'east', destinationNodeId:'n13', steps:[step('Stop at the stop sign.','stop','stop',{landmarkType:'stopSign'})] },
-  { id:'l3-01', mode:'findPlace', level:3, title:'Across town', instruction:'The park is across from the department store.', targetPlaceId:'park', startNodeId:'n11', startFacing:'north', destinationNodeId:'n20', relation:{type:'acrossFrom',referencePlaceId:'department-store'} },
-  { id:'l3-02', mode:'findPlace', level:3, title:'Next-door helpers', instruction:'The school is next to the police station.', targetPlaceId:'school', startNodeId:'n11', startFacing:'north', destinationNodeId:'n10', relation:{type:'nextTo',referencePlaceId:'police'} },
-  { id:'l3-03', mode:'findPlace', level:3, title:'Book hunt', instruction:'Choose the bookstore.', targetPlaceId:'bookstore', startNodeId:'n11', startFacing:'east', destinationNodeId:'n22' },
+  { id:'l3-01', mode:'findPlace', level:3, title:'Across the street', instruction:'Find the place across from the bakery.', targetPlaceId:'restaurant', startNodeId:'n11', startFacing:'east', destinationNodeId:'n12', relation:{type:'acrossFrom',referencePlaceId:'bakery'} },
+  { id:'l3-02', mode:'findPlace', level:3, title:'Next door', instruction:'Find the place next to the school.', targetPlaceId:'park', startNodeId:'n11', startFacing:'north', destinationNodeId:'n20', relation:{type:'nextTo',referencePlaceId:'school'} },
+  { id:'l3-03', mode:'findPlace', level:3, title:'Across the street', instruction:'Find the place across from the post office.', targetPlaceId:'bookstore', startNodeId:'n11', startFacing:'east', destinationNodeId:'n22', relation:{type:'acrossFrom',referencePlaceId:'post-office'} },
   { id:'l4-01', mode:'listening', level:4, title:'To the post office', startNodeId:'n11', startFacing:'east', destinationNodeId:'n21', steps:[step('Go straight.','move','straight'),step('Turn right at the traffic light.','turn','right',{landmarkType:'trafficLight'}),step('Stop.','stop','stop')] },
   { id:'l4-02', mode:'listening', level:4, title:'Bakery corner', startNodeId:'n02', startFacing:'north', destinationNodeId:'n01', steps:[step('Go straight.','move','straight'),step('Turn right.','turn','right'),step('Stop.','stop','stop')] },
   { id:'l4-03', mode:'listening', level:4, title:'Mall route', startNodeId:'n22', startFacing:'south', destinationNodeId:'n23', steps:[step('Go straight.','move','straight'),step('Turn left.','turn','left'),step('Stop.','stop','stop')] },
