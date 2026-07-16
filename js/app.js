@@ -54,6 +54,10 @@ function levelView(){
   return `<section class="panel-screen"><span class="eyebrow" style="color:var(--teal)">${state.mode==='speaking'?'Speaking Mode':'Listening Mode'}</span><h1 class="screen-title">Choose a level</h1><p class="screen-lead">從清楚的單一步驟開始，逐步走到完整城市導航。</p><div class="level-grid">${available.map(item=>`<button class="level-card" data-level="${item.level}"><span class="level-no">0${item.level}</span><strong>${item.name}</strong><small>${item.note}</small></button>`).join('')}</div></section>`;
 }
 
+function nextAvailableLevel(currentLevel=state.level){
+  return levels.find(item=>item.level>currentLevel&&(state.mode==='listening'||item.level!==3)&&missions.some(mission=>mission.level===item.level&&(state.mode==='speaking'?mission.mode==='speaking':mission.mode!=='speaking')))?.level??null;
+}
+
 function buildingIcon(placeId){
   const icons={
     police:'<path d="M12 25V11l20-8 20 8v14M17 25v31h30V25"/><path d="m32 29 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z"/>',
@@ -113,8 +117,16 @@ function controlView(){
 function gameView(){return `<div class="game-shell">${mapView()}${controlView()}</div>`;}
 
 function resultsView(){
-  const results=state.sessionResults;const totalStars=results.reduce((sum,item)=>sum+item.stars,0);const correct=results.reduce((sum,item)=>sum+item.correct,0);const total=results.reduce((sum,item)=>sum+item.total,0);const hints=results.reduce((sum,item)=>sum+item.hints,0);const replays=results.reduce((sum,item)=>sum+item.replays,0);const mistakes=[...new Set(results.flatMap(item=>item.mistakes))];
-  return `<section class="panel-screen"><span class="eyebrow" style="color:var(--teal)">Route complete</span><h1 class="screen-title">Great job!</h1><p class="screen-lead">You completed ${results.length} mission${results.length===1?'':'s'}.</p><div class="result-stars" aria-label="獲得 ${totalStars} 顆星">${'★'.repeat(totalStars)}${'☆'.repeat(Math.max(0,results.length*3-totalStars))}</div><div class="stats-grid"><div class="stat"><strong>${results.length}</strong><span>Missions</span></div><div class="stat"><strong>${total?Math.round(correct/total*100):100}%</strong><span>${state.mode==='speaking'?'Speaking':'Listening'} Accuracy</span></div><div class="stat"><strong>${hints}</strong><span>Hints Used</span></div><div class="stat"><strong>${replays}</strong><span>Listen Again</span></div><div class="stat"><strong>${totalStars}</strong><span>Total Stars</span></div></div><h2>You need more practice with:</h2>${mistakes.length?`<ul class="mistake-list">${mistakes.map(item=>`<li>${escapeHTML(item)}</li>`).join('')}</ul>`:'<p>No mistakes this time. Excellent navigation!</p>'}<div class="button-row"><button class="secondary-btn" data-action="practice">Practice Mistakes</button><button class="secondary-btn" data-action="play-again">Play Again</button><button class="primary-btn" data-action="home">Back to Home</button></div></section>`;
+  const results=state.sessionResults;
+  const totalStars=results.reduce((sum,item)=>sum+item.stars,0);
+  const correct=results.reduce((sum,item)=>sum+item.correct,0);
+  const total=results.reduce((sum,item)=>sum+item.total,0);
+  const hints=results.reduce((sum,item)=>sum+item.hints,0);
+  const replays=results.reduce((sum,item)=>sum+item.replays,0);
+  const mistakes=[...new Set(results.flatMap(item=>item.mistakes))];
+  const nextLevel=nextAvailableLevel();
+  const continueAction=nextLevel?`<button class="primary-btn next-level-btn" data-action="next-level">Continue to Level ${nextLevel} →</button>`:`<button class="primary-btn" data-action="home">All Levels Complete · Home</button>`;
+  return `<section class="panel-screen"><span class="eyebrow" style="color:var(--teal)">Level ${state.level} complete</span><h1 class="screen-title">Great job!</h1><p class="screen-lead">You completed ${results.length} mission${results.length===1?'':'s'} in Level ${state.level}.</p><div class="result-stars" aria-label="獲得 ${totalStars} 顆星">${'★'.repeat(totalStars)}${'☆'.repeat(Math.max(0,results.length*3-totalStars))}</div><div class="stats-grid"><div class="stat"><strong>${results.length}</strong><span>Missions</span></div><div class="stat"><strong>${total?Math.round(correct/total*100):100}%</strong><span>${state.mode==='speaking'?'Speaking':'Listening'} Accuracy</span></div><div class="stat"><strong>${hints}</strong><span>Hints Used</span></div><div class="stat"><strong>${replays}</strong><span>Listen Again</span></div><div class="stat"><strong>${totalStars}</strong><span>Total Stars</span></div></div><h2>You need more practice with:</h2>${mistakes.length?`<ul class="mistake-list">${mistakes.map(item=>`<li>${escapeHTML(item)}</li>`).join('')}</ul>`:'<p>No mistakes this time. Excellent navigation!</p>'}<div class="button-row"><button class="secondary-btn" data-action="practice">Practice Mistakes</button><button class="secondary-btn" data-action="play-again">Play Level ${state.level} Again</button>${nextLevel?'<button class="secondary-btn" data-action="home">Back to Home</button>':''}${continueAction}</div></section>`;
 }
 
 function missionCompleteModal(){
@@ -238,6 +250,7 @@ function action(name){
   if(name==='hint')showHint();
   if(name==='listen')listen();
   if(name==='play-again')startSession(state.level);
+  if(name==='next-level'){const nextLevel=nextAvailableLevel();if(nextLevel)startSession(nextLevel);}
   if(name==='next-mission'){state.sessionIndex+=1;loadMission();}
   if(name==='tutorial'){state.returnScreen=state.screen;state.screen='tutorial';state.tutorialStep=0;render();}
   if(name==='skip-tutorial'||name==='next-tutorial'&&state.tutorialStep===tutorialPages.length-1){state.settings.tutorialSeen=true;saveSettings();state.screen=state.returnScreen==='tutorial'?'home':state.returnScreen;render();}
@@ -245,5 +258,5 @@ function action(name){
   if(name==='reset-progress'&&window.confirm('Clear all stars and learning records?')){storage.clear();announce('Learning record cleared.');render();}
 }
 
-window.__CITY_NAVIGATOR__={route,character,parser,storage,state,missions,cityMap,startSession,handleCommand};
+window.__CITY_NAVIGATOR__={route,character,parser,storage,state,missions,cityMap,startSession,handleCommand,nextAvailableLevel};
 render();
