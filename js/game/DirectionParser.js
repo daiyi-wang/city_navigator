@@ -10,6 +10,7 @@ export class DirectionParser {
     else if(/\b(straight|forward|continue)\b/.test(text)) intent={action:'move',direction:'straight'};
     if(!intent) return null;
     if(/traffic light/.test(text)) intent.landmarkType='trafficLight';
+    if(/bus stop/.test(text)) intent.landmarkType='busStop';
     if(/stop sign/.test(text)) intent.landmarkType='stopSign';
     if(/\b2\s*(blocks?|steps?)?\b/.test(text)) intent.distance=2;
     if(/\b1\s*(blocks?|steps?)?\b/.test(text)) intent.distance=1;
