@@ -19,6 +19,7 @@ export const cityMap = {
     { id: 'n12', x: 38, y: 61, type: 'intersection' },
     { id: 'mall-front', x: 38, y: 73, type: 'arrival' },
     { id: 'n22', x: 62, y: 61, type: 'intersection' },
+    { id: 'department-store-front', x: 62, y: 73, type: 'arrival' },
     { id: 'n32', x: 86, y: 61, type: 'trafficLight', landmark: 'trafficLight' },
     { id: 'n03', x: 14, y: 83, type: 'intersection' },
     { id: 'n13', x: 38, y: 83, type: 'busStop', landmark: 'busStop' },
@@ -46,7 +47,8 @@ const arrivalNodes = {
   restaurant: 'restaurant-front',
   bookstore: 'bookstore-front',
   'fire-station': 'fire-station-front',
-  mall: 'mall-front'
+  mall: 'mall-front',
+  'department-store': 'department-store-front'
 };
 for (const place of cityMap.places) place.arrivalNodeId = arrivalNodes[place.id] || place.nodeId;
 
@@ -57,7 +59,7 @@ const directions = [
   ['n03','n13','east'],['n13','n23','east'],['n23','n33','east'],
   ['n00','bakery-front','south'],['bakery-front','n01','south'],['n01','restaurant-front','south'],['restaurant-front','n02','south'],['n02','fire-station-front','south'],['fire-station-front','n03','south'],
   ['n10','n11','south'],['n11','n12','south'],['n12','mall-front','south'],['mall-front','n13','south'],
-  ['n20','n21','south'],['n21','bookstore-front','south'],['bookstore-front','n22','south'],['n22','n23','south'],
+  ['n20','n21','south'],['n21','bookstore-front','south'],['bookstore-front','n22','south'],['n22','department-store-front','south'],['department-store-front','n23','south'],
   ['n30','n31','south'],['n31','n32','south'],['n32','n33','south']
 ];
 const opposite = { east: 'west', south: 'north' };
