@@ -23,7 +23,7 @@ const state={screen:'home',mode:null,level:1,mission:null,session:[],sessionInde
 
 const escapeHTML=value=>String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
 const announce=text=>{announcer.textContent='';setTimeout(()=>{announcer.textContent=text;},20);};
-const saveSettings=()=>{try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(state.settings));}catch{}speech.rate=state.settings.speed==='slow'?.72:1;};
+const saveSettings=()=>{try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(state.settings));}catch{}speech.rate=state.settings.speed==='slow'?.82:.95;};
 saveSettings();
 
 function topbar(){
