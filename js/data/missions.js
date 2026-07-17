@@ -7,11 +7,11 @@ export const missions = [
   { id:'l1-03', mode:'listening', level:1, title:'Face Main Street east', startNodeId:'main-market', startFacing:'north', targetFacing:'east', destinationNodeId:'main-market', steps:[step('Turn right.','turn','right')] },
   { id:'l1-04', mode:'listening', level:1, title:'Stop safely', startNodeId:'main-west', startFacing:'east', destinationNodeId:'main-west', steps:[step('Stop.','stop','stop')] },
 
-  // Level 2: one landmark-based action at a visible signal or sign.
+  // Level 2: one landmark-based action at a visible traffic light or bus stop.
   { id:'l2-01', mode:'listening', level:2, title:'Left at the traffic light', startNodeId:'main-market', startFacing:'east', targetFacing:'north', destinationNodeId:'main-market', steps:[step('Turn left at the traffic light.','turn','left',{landmarkType:'trafficLight'})] },
   { id:'l2-02', mode:'listening', level:2, title:'Right at the traffic light', startNodeId:'main-park', startFacing:'east', targetFacing:'south', destinationNodeId:'main-park', steps:[step('Turn right at the traffic light.','turn','right',{landmarkType:'trafficLight'})] },
-  { id:'l2-03', mode:'listening', level:2, title:'Stop at the west sign', startNodeId:'main-west', startFacing:'east', destinationNodeId:'main-west', steps:[step('Stop at the stop sign.','stop','stop',{landmarkType:'stopSign'})] },
-  { id:'l2-04', mode:'listening', level:2, title:'Stop at the east sign', startNodeId:'station-east', startFacing:'west', destinationNodeId:'station-east', steps:[step('Stop at the stop sign.','stop','stop',{landmarkType:'stopSign'})] },
+  { id:'l2-03', mode:'listening', level:2, title:'Stop at the west bus stop', startNodeId:'bus-west', startFacing:'east', destinationNodeId:'bus-west', steps:[step('Stop at the bus stop.','stop','stop',{landmarkType:'busStop'})] },
+  { id:'l2-04', mode:'listening', level:2, title:'Stop at the east bus stop', startNodeId:'bus-east', startFacing:'west', destinationNodeId:'bus-east', steps:[step('Stop at the bus stop.','stop','stop',{landmarkType:'busStop'})] },
 
   // Level 3: all five position targets from the README.
   { id:'l3-01', mode:'findPlace', level:3, title:'On your left', instruction:'Find the place on your left.', targetPlaceId:'police', startNodeId:'police-front', startFacing:'east', destinationNodeId:'police-front', relation:{type:'leftOfTraveler'} },
@@ -40,7 +40,7 @@ export const missions = [
 
 export const levels = [
   {level:1,name:'Basic Directions',note:'One action at a time'},
-  {level:2,name:'Landmarks',note:'Traffic lights & stop signs'},
+  {level:2,name:'Landmarks',note:'Traffic lights & bus stops'},
   {level:3,name:'Places & Positions',note:'Left, right & place relations'},
   {level:4,name:'Short Routes',note:'Two to three steps'},
   {level:5,name:'Full Navigation',note:'Blocks, landmarks & go past'}

@@ -59,9 +59,9 @@ function nextAvailableLevel(currentLevel=state.level){
 }
 
 function landmarkMarker(type){
-  if(type==='trafficLight')return `<span class="landmark landmark-light" aria-label="Traffic light"><svg viewBox="0 0 40 50" aria-hidden="true"><rect x="10" y="2" width="20" height="34" rx="7"/><circle class="light-red" cx="20" cy="10" r="4"/><circle class="light-yellow" cx="20" cy="19" r="4"/><circle class="light-green" cx="20" cy="28" r="4"/><path d="M20 36v10M13 46h14"/></svg></span>`;
+  if(type==='trafficLight')return `<span class="landmark landmark-light" aria-label="Traffic light"><svg viewBox="0 0 40 50" aria-hidden="true"><rect x="7" y="1" width="26" height="37" rx="7"/><circle class="light-red" cx="20" cy="9" r="5.7"/><circle class="light-yellow" cx="20" cy="20" r="5.7"/><circle class="light-green" cx="20" cy="31" r="5.7"/><path d="M20 38v9M13 47h14"/></svg></span>`;
   if(type==='busStop')return `<span class="landmark landmark-bus" aria-label="Bus stop"><svg viewBox="0 0 28 48" aria-hidden="true"><rect x="3" y="2" width="22" height="27" rx="4"/><path d="M8 8h12v9H8zM7 22h14M10 29v15m8-15v15M7 44h14"/><circle cx="9" cy="24" r="1.5"/><circle cx="19" cy="24" r="1.5"/></svg></span>`;
-  return `<span class="landmark landmark-stop" aria-label="Stop sign"><svg viewBox="0 0 42 50" aria-hidden="true"><path d="m12 3 17 0 10 10v17L29 40H12L2 30V13Z"/><path d="M21 40v7M13 47h16"/></svg></span>`;
+  return '';
 }
 
 function mapView(){
@@ -104,7 +104,7 @@ function controlView(){
   const directionButtons=`<button class="action-btn" data-command="move:straight" ${disabled}><span class="symbol">↑</span>Go Straight</button><button class="action-btn" data-command="stop:stop" ${disabled}><span class="symbol">■</span>Stop</button><button class="action-btn" data-command="turn:left" ${disabled}><span class="symbol">↰</span>Turn Left</button><button class="action-btn" data-command="turn:right" ${disabled}><span class="symbol">↱</span>Turn Right</button>`;
   const speakingMain=`<div class="free-route-card"><span class="instruction-label">Your route</span><strong>Choose your own way to the goal.</strong><p>Say one direction at a time. Any valid route is correct.</p></div><div class="control-grid"><button class="mic-btn ${state.listening?'listening':''}" data-action="listen" ${state.listening?'disabled':''}>${state.listening?'● Listening…':'● Start Speaking'}</button>${state.transcript?`<div class="instruction-card" style="grid-column:1/-1"><span class="instruction-label">I heard</span><span class="instruction-text">“${escapeHTML(state.transcript)}”</span></div>`:''}${directionButtons}</div>`;
   const main=mission.mode==='speaking'?speakingMain:mission.mode==='findPlace'?`<div class="instruction-card ${captionVisible?'':'hidden-text'}"><span class="instruction-label">Listening clue</span><span class="instruction-text">${escapeHTML(instruction)}</span></div><div class="control-grid"><button class="play-btn" data-action="play">▶ Play listening clue</button></div><p class="mission-goal">Listen to the position words, then tap the correct building. The answer name is not spoken.</p>`:`<div class="instruction-card ${captionVisible?'':'hidden-text'}"><span class="instruction-label">Current instruction</span><span class="instruction-text">${escapeHTML(instruction)}</span></div><div class="control-grid"><button class="play-btn" data-action="play">▶ Play instruction</button>${directionButtons}</div>`;
-  const listeningGoal={1:'Listen, then perform one basic action.',2:'Use the named traffic light or stop sign.',4:'Follow the short route one step at a time.',5:'Follow the full route using blocks and landmarks.'}[mission.level]||'Follow each clue to the destination.';
+  const listeningGoal={1:'Listen, then perform one basic action.',2:'Use the named traffic light or bus stop.',4:'Follow the short route one step at a time.',5:'Follow the full route using blocks and landmarks.'}[mission.level]||'Follow each clue to the destination.';
   const missionGoal=mission.mode==='speaking'?'Reach the goal using a route you choose.':mission.mode==='findPlace'?'Listen to the location clue and find the building.':listeningGoal;
   return `<aside class="control-panel"><div class="mission-kicker"><span>MISSION ${state.sessionIndex+1}</span><span>LEVEL ${mission.level}</span></div><h1 class="mission-title">${escapeHTML(mission.title)}</h1><p class="mission-goal">${missionGoal}</p>${destinationCopy}<div class="step-dots" aria-label="任務步驟進度">${dots}</div>${main}${feedbackView()}<div class="minor-actions">${mission.mode==='listening'?'<button data-action="replay">↻ Listen Again</button>':''}<button data-action="hint">✦ Hint ${state.hintLevel}/4</button></div>${mission.mode==='speaking'&&!recognition.supported()?'<p class="mission-goal" role="status">This browser cannot use speech recognition. Use the direction buttons instead.</p>':''}</aside>`;
 }
@@ -277,7 +277,7 @@ function showHint(){
         :`Find ${references[0]}, then check the place ${relation} it.`;
     hints=[`Listen for “${relation}”.`,mapHint,expected.instruction.replace(new RegExp(relation,'i'),'___'),expected.instruction];
   }else{
-    const landmarkName={trafficLight:'traffic light',busStop:'bus stop',stopSign:'stop sign'}[expected.intent.landmarkType];
+    const landmarkName={trafficLight:'traffic light',busStop:'bus stop'}[expected.intent.landmarkType];
     hints=[expected.intent.direction?`Listen for “${expected.intent.direction}”.`:'Look carefully at the place names.',landmarkName?`Look for the ${landmarkName}.`:'Use the GOAL marker on the map.',expected.instruction.replace(/left|right|straight|stop/i,'___'),expected.instruction];
   }
   state.feedback={type:'error',title:`Hint ${state.hintLevel}`,message:hints[state.hintLevel-1]};

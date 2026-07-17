@@ -8,7 +8,7 @@ export const cityMap = {
     { id: 'park-avenue', axis: 'v', position: 72, label: 'Park Avenue' }
   ],
   nodes: [
-    { id: 'main-west', x: 4, y: 32, type: 'stopSign', landmark: 'stopSign', blockBoundary: true, markerOffset: { x: 2.2, y: -4.2 } },
+    { id: 'main-west', x: 4, y: 32, type: 'road', blockBoundary: true },
     { id: 'police-front', x: 10, y: 32, type: 'buildingEntrance' },
     { id: 'school-front', x: 20, y: 32, type: 'buildingEntrance' },
     { id: 'main-market', x: 28, y: 32, type: 'trafficLight', landmark: 'trafficLight', blockBoundary: true, markerOffset: { x: -3.6, y: -4.3 } },
@@ -28,7 +28,7 @@ export const cityMap = {
     { id: 'department-store-front', x: 50, y: 68, type: 'buildingEntrance' },
     { id: 'station-park', x: 72, y: 68, type: 'trafficLight', landmark: 'trafficLight', blockBoundary: true, markerOffset: { x: 3.5, y: -4.3 } },
     { id: 'bus-east', x: 82, y: 68, type: 'road', landmark: 'busStop', markerOffset: { x: 0, y: 5.1 } },
-    { id: 'station-east', x: 96, y: 68, type: 'stopSign', landmark: 'stopSign', blockBoundary: true, markerOffset: { x: -2.2, y: -4.2 } },
+    { id: 'station-east', x: 96, y: 68, type: 'road', blockBoundary: true },
 
     { id: 'market-north', x: 28, y: 4, type: 'road', blockBoundary: true },
     { id: 'market-south', x: 28, y: 96, type: 'road', blockBoundary: true },

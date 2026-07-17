@@ -11,7 +11,6 @@ export class DirectionParser {
     if(!intent) return null;
     if(/traffic light/.test(text)) intent.landmarkType='trafficLight';
     if(/bus stop/.test(text)) intent.landmarkType='busStop';
-    if(/stop sign/.test(text)) intent.landmarkType='stopSign';
     if(intent.action==='move'&&/\b2\s*(blocks?|steps?)?\b/.test(text)) intent.distance=2;
     if(intent.action==='move'&&/\b1\s*(blocks?|steps?)?\b/.test(text)) intent.distance=1;
     if(intent.action==='move'&&/\bblocks?\b/.test(text)) intent.distanceUnit='blocks';
