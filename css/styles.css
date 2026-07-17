@@ -16,3 +16,4 @@
 @media(max-width:700px){.landmark-position .landmark{width:39px;min-height:43px;padding:2px}.landmark svg{width:22px;height:26px}.landmark small{font-size:6px}.destination-copy strong{font-size:16px}}
 .arrival-node{position:absolute;z-index:3;width:15px;height:7px;transform:translate(-50%,-50%);border:2px solid var(--teal);border-radius:99px;background:#fff}.destination-marker{white-space:nowrap}@keyframes celebrate{50%{filter:brightness(1.08);box-shadow:0 8px 16px rgba(0,0,0,.28)}}
 .next-level-btn{min-width:210px}
+.free-route-card{margin:14px 0;padding:17px 18px;border:2px dashed var(--teal);border-radius:15px;background:#f4fbfa}.free-route-card strong{display:block;font:600 20px 'Fredoka';color:var(--ink)}.free-route-card p{margin:6px 0 0;color:var(--muted);line-height:1.4}

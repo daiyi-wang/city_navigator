@@ -16,11 +16,11 @@ export const missions = [
   { id:'l4-03', mode:'listening', level:4, title:'To the restaurant', startNodeId:'n12', startFacing:'west', destinationNodeId:'restaurant-front', steps:[step('Go straight.','move','straight'),step('Turn right at the bus stop.','turn','right',{landmarkType:'busStop'}),step('Go straight to the restaurant.','move','straight')] },
   { id:'l5-01', mode:'listening', level:5, title:'To the park', startNodeId:'n00', startFacing:'east', destinationNodeId:'park-front', steps:[step('Go straight for two blocks.','move','straight',{distance:2}),step('Go straight to the park.','move','straight'),step('Stop at the park.','stop','stop')] },
   { id:'l5-02', mode:'listening', level:5, title:'To the department store', startNodeId:'n30', startFacing:'south', destinationNodeId:'department-store-front', steps:[step('Go straight for two blocks.','move','straight',{distance:2}),step('Turn right at the traffic light.','turn','right',{landmarkType:'trafficLight'}),step('Go straight.','move','straight'),step('Turn left.','turn','left'),step('Go straight to the department store.','move','straight')] },
-  { id:'s1-01', mode:'speaking', level:1, title:'Say the turn', startNodeId:'n10', startFacing:'east', destinationNodeId:'n10', steps:[step('Turn right.','turn','right')] },
-  { id:'s2-01', mode:'speaking', level:2, title:'Speak at the light', startNodeId:'n21', startFacing:'north', destinationNodeId:'n21', steps:[step('Turn left at the traffic light.','turn','left',{landmarkType:'trafficLight'})] },
-  { id:'s3-01', mode:'speaking', level:3, title:'Guide to the bakery', startNodeId:'n01', startFacing:'north', destinationNodeId:'bakery-front', steps:[step('Go straight to the bakery.','move','straight'),step('Stop.','stop','stop')] },
-  { id:'s4-01', mode:'speaking', level:4, title:'Guide to the mall', startNodeId:'n13', startFacing:'north', destinationNodeId:'mall-front', steps:[step('Go straight to the mall.','move','straight'),step('Stop.','stop','stop')] },
-  { id:'s5-01', mode:'speaking', level:5, title:'Guide across town', startNodeId:'n00', startFacing:'east', destinationNodeId:'n20', steps:[step('Go straight for two blocks.','move','straight',{distance:2}),step('Stop.','stop','stop')] }
+  { id:'s1-01', mode:'speaking', level:1, title:'Guide to the bakery', startNodeId:'n01', startFacing:'north', destinationNodeId:'bakery-front', freeRoute:true, steps:[] },
+  { id:'s2-01', mode:'speaking', level:2, title:'Guide to the bookstore', startNodeId:'n11', startFacing:'east', destinationNodeId:'bookstore-front', freeRoute:true, steps:[] },
+  { id:'s3-01', mode:'speaking', level:3, title:'Guide to the fire station', startNodeId:'n11', startFacing:'west', destinationNodeId:'fire-station-front', freeRoute:true, steps:[] },
+  { id:'s4-01', mode:'speaking', level:4, title:'Guide to the mall', startNodeId:'n22', startFacing:'west', destinationNodeId:'mall-front', freeRoute:true, steps:[] },
+  { id:'s5-01', mode:'speaking', level:5, title:'Guide to the department store', startNodeId:'n00', startFacing:'east', destinationNodeId:'department-store-front', freeRoute:true, steps:[] }
 ];
 
 export const levels = [
