@@ -19,7 +19,7 @@ const recognition=new SpeechRecognitionService();
 const SETTINGS_KEY='cityNavigator.settings.v1';
 const defaultSettings={speed:'slow',sound:true,music:false,autoPlay:true,replays:'2',captions:false,speechEnabled:true,animation:'normal',tutorialSeen:false};
 const loadSettings=()=>{try{return {...defaultSettings,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')};}catch{return {...defaultSettings};}};
-const state={screen:'home',mode:null,level:1,mission:null,session:[],sessionIndex:0,stepIndex:0,settings:loadSettings(),feedback:null,hintLevel:0,showCaption:false,transcript:'',listening:false,busy:false,moving:false,lastAction:null,missionComplete:false,visitedSegments:[],sessionResults:[],tutorialStep:0,returnScreen:'home'};
+const state={screen:'home',mode:null,level:1,mission:null,session:[],sessionIndex:0,stepIndex:0,commandProgress:0,settings:loadSettings(),feedback:null,hintLevel:0,showCaption:false,transcript:'',listening:false,busy:false,moving:false,lastAction:null,missionComplete:false,visitedSegments:[],sessionResults:[],tutorialStep:0,returnScreen:'home'};
 
 const escapeHTML=value=>String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
 const announce=text=>{announcer.textContent='';setTimeout(()=>{announcer.textContent=text;},20);};
@@ -156,7 +156,7 @@ function tutorialModal(){const page=tutorialPages[state.tutorialStep];return `<d
 
 function selectMode(mode){state.mode=mode;if(mode==='speaking'&&!state.settings.speechEnabled){state.returnScreen='home';state.screen='settings';render();return;}state.screen='modeSelection';render();}
 function startSession(level,customMissions=null){state.level=level;let pool=customMissions||missions.filter(item=>item.level===level&&(state.mode==='speaking'?item.mode==='speaking':item.mode!=='speaking'));state.session=pool.slice(0,3);if(!state.session.length){state.screen='home';render();return;}state.sessionIndex=0;state.sessionResults=[];state.screen='game';loadMission();}
-function loadMission(){state.mission=state.session[state.sessionIndex];state.stepIndex=0;state.feedback=null;state.hintLevel=0;state.showCaption=false;state.transcript='';state.busy=false;state.moving=false;state.lastAction=null;state.missionComplete=false;state.visitedSegments=[];scorer.reset();character.reset(state.mission.startNodeId,state.mission.startFacing);render();if(state.settings.autoPlay&&state.mission.mode!=='findPlace')setTimeout(()=>playInstruction(false),250);}
+function loadMission(){state.mission=state.session[state.sessionIndex];state.stepIndex=0;state.commandProgress=0;state.feedback=null;state.hintLevel=0;state.showCaption=false;state.transcript='';state.busy=false;state.moving=false;state.lastAction=null;state.missionComplete=false;state.visitedSegments=[];scorer.reset();character.reset(state.mission.startNodeId,state.mission.startFacing);render();if(state.settings.autoPlay&&state.mission.mode!=='findPlace')setTimeout(()=>playInstruction(false),250);}
 function intentsMatch(actual,expected){return actual&&actual.action===expected.action&&(expected.direction?actual.direction===expected.direction:true);}
 
 function animateCharacterPath(nodeIds,duration){
@@ -206,7 +206,11 @@ function handleCommand(intent,fromFallback=false){
   if(fromFallback&&state.mission.mode==='speaking')scorer.usedFallback=true;
   if(!intentsMatch(intent,expected.intent)){registerError(expected.instruction,intent.action==='move'&&!route.forward(character.currentNodeId,character.facing)?'You can’t go that way. Try another direction.':'Try again. Listen for the key direction word.');return;}
   if(expected.intent.landmarkType&&!route.hasLandmark(character.currentNodeId,expected.intent.landmarkType)){registerError(expected.instruction,'Look for the correct landmark before you turn.');return;}
-  const before=character.currentNodeId;const facingBefore=character.facing;const result=character.execute(expected.intent);
+  const buttonMultiBlock=expected.intent.action==='move'&&Number(expected.intent.distance)>1&&!intent.distance;
+  const nextCommandProgress=buttonMultiBlock?state.commandProgress+1:0;
+  const continueCommand=buttonMultiBlock&&nextCommandProgress<expected.intent.distance;
+  const executionIntent=buttonMultiBlock?{...expected.intent,distance:1}:expected.intent;
+  const before=character.currentNodeId;const facingBefore=character.facing;const result=character.execute(executionIntent);
   if(!result.ok){registerError(expected.instruction,'You can’t go that way. Try another direction.');return;}
   if(result.path?.length){let from=before;for(const to of result.path){state.visitedSegments.push({from,to});from=to;}}
   const pathNodes=[before,...(result.path||[])];
@@ -215,8 +219,10 @@ function handleCommand(intent,fromFallback=false){
   const duration=result.type==='move'&&!reducedMotion?Math.max(1,result.path.length)*blockDuration:result.type==='turn'&&!reducedMotion?420:160;
   state.busy=true;state.moving=result.type==='move'&&duration>0;
   state.lastAction=result.type;
-  state.feedback={type:'success',title:state.moving?'On the way…':'Great!',message:expected.instruction};state.stepIndex+=1;announce(`Correct. ${expected.instruction}`);playTone(true);render();
-  const finish=()=>{state.busy=false;state.moving=false;if(state.feedback?.type==='success')state.feedback.title='Great!';render();if(state.stepIndex>=state.mission.steps.length){setTimeout(completeMission,350);}else if(state.settings.autoPlay){setTimeout(()=>playInstruction(false),250);}};
+  state.feedback={type:'success',title:state.moving?'On the way…':'Great!',message:expected.instruction};state.stepIndex+=1;announce(`Correct. ${expected.instruction}`);playTone(true);
+  if(buttonMultiBlock){state.commandProgress=continueCommand?nextCommandProgress:0;if(continueCommand){state.stepIndex-=1;state.feedback={type:'success',title:`Block ${nextCommandProgress} of ${expected.intent.distance}`,message:'Press Go Straight once more.'};announce(`${nextCommandProgress} of ${expected.intent.distance} blocks complete.`);}}
+  render();
+  const finish=()=>{state.busy=false;state.moving=false;if(state.feedback?.type==='success'&&!continueCommand)state.feedback.title='Great!';render();if(continueCommand)return;if(state.stepIndex>=state.mission.steps.length){setTimeout(completeMission,350);}else if(state.settings.autoPlay){setTimeout(()=>playInstruction(false),250);}};
   if(result.type==='move'&&duration>0){requestAnimationFrame(()=>animateCharacterPath(pathNodes,duration).then(finish));}else if(result.type==='turn'&&!reducedMotion){requestAnimationFrame(()=>animateCharacterTurn(facingBefore,expected.intent.direction,duration).then(finish));}else{setTimeout(finish,duration);}
 }
 function registerError(phrase,message){scorer.errors+=1;state.feedback={type:'error',title:scorer.errors>=3?'Let’s solve it together.':'Try again.',message};announce(state.feedback.title+' '+message);playTone(false);if(scorer.errors===2){speech.speak(state.mission.steps[state.stepIndex].instruction,{slow:true});state.showCaption=true;}if(scorer.errors>=3){state.showCaption=true;state.hintLevel=Math.max(state.hintLevel,4);}render();}
