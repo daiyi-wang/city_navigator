@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sunny Town — Map Study</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect width=%2264%22 height=%2264%22 rx=%2216%22 fill=%22%23f4d35e%22/><path d=%22M11 27h42v10H11zm16-16h10v42H27z%22 fill=%22%23536069%22/></svg>" />
+    <link rel="stylesheet" href="css/map-preview.css" />
+  </head>
+  <body>
+    <main class="preview-shell">
+      <header class="preview-header">
+        <div>
+          <span class="preview-kicker">CITY NAVIGATOR · MAP STUDY</span>
+          <h1>Sunny Town</h1>
+          <p>街廓式城市：建築沿街排列，入口由臨路位置自然表達。</p>
+        </div>
+        <div class="design-key" aria-label="地圖設計重點">
+          <span>同一路段多棟建築</span>
+          <span>無入口短線</span>
+          <span>可替換美術槽</span>
+        </div>
+      </header>
+
+      <section class="map-frame" aria-labelledby="map-title">
+        <div class="map-titlebar">
+          <h2 id="map-title">Town map</h2>
+          <span class="north">N ↑</span>
+        </div>
+        <div id="town-map" class="town-map" aria-label="Sunny Town 新版街廓地圖"></div>
+      </section>
+
+      <p class="preview-note">本頁只確認地圖結構；關卡、起點、終點與路線會在地圖定案後依 README 重新設計。</p>
+    </main>
+    <script type="module" src="js/map-preview.js"></script>
+  </body>
+</html>

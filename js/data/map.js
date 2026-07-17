@@ -1,69 +1,77 @@
 export const cityMap = {
   id: 'sunny-town',
   name: 'Sunny Town',
-  nodes: [
-    { id: 'n00', x: 14, y: 17, type: 'start' },
-    { id: 'bakery-front', x: 14, y: 29, type: 'arrival' },
-    { id: 'n10', x: 38, y: 17, type: 'trafficLight', landmark: 'trafficLight' },
-    { id: 'n20', x: 62, y: 17, type: 'intersection' },
-    { id: 'park-front', x: 75, y: 17, type: 'arrival' },
-    { id: 'n30', x: 86, y: 17, type: 'stopSign', landmark: 'stopSign' },
-    { id: 'n01', x: 14, y: 39, type: 'intersection' },
-    { id: 'restaurant-front', x: 14, y: 51, type: 'arrival' },
-    { id: 'n11', x: 38, y: 39, type: 'intersection' },
-    { id: 'n21', x: 62, y: 39, type: 'trafficLight', landmark: 'trafficLight' },
-    { id: 'bookstore-front', x: 74, y: 61, type: 'arrival' },
-    { id: 'n31', x: 86, y: 39, type: 'intersection' },
-    { id: 'n02', x: 14, y: 61, type: 'busStop', landmark: 'busStop' },
-    { id: 'fire-station-front', x: 14, y: 73, type: 'arrival' },
-    { id: 'n12', x: 38, y: 61, type: 'intersection' },
-    { id: 'mall-front', x: 38, y: 73, type: 'arrival' },
-    { id: 'n22', x: 62, y: 61, type: 'intersection' },
-    { id: 'department-store-front', x: 62, y: 73, type: 'arrival' },
-    { id: 'n32', x: 86, y: 61, type: 'trafficLight', landmark: 'trafficLight' },
-    { id: 'n03', x: 14, y: 83, type: 'intersection' },
-    { id: 'n13', x: 38, y: 83, type: 'busStop', landmark: 'busStop' },
-    { id: 'n23', x: 62, y: 83, type: 'destination' },
-    { id: 'n33', x: 86, y: 83, type: 'intersection' }
+  roads: [
+    { id: 'main-street', axis: 'h', position: 32, label: 'Main Street' },
+    { id: 'station-road', axis: 'h', position: 68, label: 'Station Road' },
+    { id: 'market-lane', axis: 'v', position: 28, label: 'Market Lane' },
+    { id: 'park-avenue', axis: 'v', position: 72, label: 'Park Avenue' }
   ],
-  edges: [],
+  nodes: [
+    { id: 'main-west', x: 4, y: 32, type: 'stopSign', landmark: 'stopSign', blockBoundary: true, markerOffset: { x: 2.2, y: -4.2 } },
+    { id: 'police-front', x: 10, y: 32, type: 'buildingEntrance' },
+    { id: 'school-front', x: 20, y: 32, type: 'buildingEntrance' },
+    { id: 'main-market', x: 28, y: 32, type: 'trafficLight', landmark: 'trafficLight', blockBoundary: true, markerOffset: { x: -3.6, y: -4.3 } },
+    { id: 'bakery-front', x: 37, y: 32, type: 'buildingEntrance' },
+    { id: 'bookstore-front', x: 47, y: 32, type: 'buildingEntrance' },
+    { id: 'park-front', x: 60, y: 32, type: 'buildingEntrance' },
+    { id: 'main-park', x: 72, y: 32, type: 'trafficLight', landmark: 'trafficLight', blockBoundary: true, markerOffset: { x: -3.6, y: -4.3 } },
+    { id: 'restaurant-front', x: 81, y: 32, type: 'buildingEntrance' },
+    { id: 'post-office-front', x: 91, y: 32, type: 'buildingEntrance' },
+    { id: 'main-east', x: 96, y: 32, type: 'road', blockBoundary: true },
+
+    { id: 'station-west', x: 4, y: 68, type: 'road', blockBoundary: true },
+    { id: 'fire-station-front', x: 10, y: 68, type: 'buildingEntrance' },
+    { id: 'mall-front', x: 20, y: 68, type: 'buildingEntrance' },
+    { id: 'station-market', x: 28, y: 68, type: 'trafficLight', landmark: 'trafficLight', blockBoundary: true, markerOffset: { x: 3.5, y: -4.3 } },
+    { id: 'bus-west', x: 38, y: 68, type: 'road', landmark: 'busStop', markerOffset: { x: 0, y: -5.2 } },
+    { id: 'department-store-front', x: 50, y: 68, type: 'buildingEntrance' },
+    { id: 'station-park', x: 72, y: 68, type: 'trafficLight', landmark: 'trafficLight', blockBoundary: true, markerOffset: { x: 3.5, y: -4.3 } },
+    { id: 'bus-east', x: 82, y: 68, type: 'road', landmark: 'busStop', markerOffset: { x: 0, y: 5.1 } },
+    { id: 'station-east', x: 96, y: 68, type: 'stopSign', landmark: 'stopSign', blockBoundary: true, markerOffset: { x: -2.2, y: -4.2 } },
+
+    { id: 'market-north', x: 28, y: 4, type: 'road', blockBoundary: true },
+    { id: 'market-south', x: 28, y: 96, type: 'road', blockBoundary: true },
+    { id: 'park-north', x: 72, y: 4, type: 'road', blockBoundary: true },
+    { id: 'park-south', x: 72, y: 96, type: 'road', blockBoundary: true }
+  ],
   places: [
-    { id: 'police', name: 'Police Station', icon: '★', x: 14, y: 7, roadSide: 'south', nodeId: 'n00', color: '#6c7bd9' },
-    { id: 'school', name: 'School', icon: 'ABC', x: 38, y: 7, roadSide: 'south', nodeId: 'n10', color: '#f2b84b' },
-    { id: 'park', name: 'Park', icon: '♣', x: 75, y: 7, roadSide: 'south', nodeId: 'n20', color: '#65a866' },
-    { id: 'bakery', name: 'Bakery', icon: 'B', x: 20, y: 29, roadSide: 'west', nodeId: 'n01', color: '#e78272' },
-    { id: 'post-office', name: 'Post Office', icon: '✉', x: 68, y: 29, roadSide: 'west', nodeId: 'n21', color: '#5d91c9' },
-    { id: 'restaurant', name: 'Restaurant', icon: 'R', x: 20, y: 51, roadSide: 'west', nodeId: 'n12', color: '#de7857' },
-    { id: 'bookstore', name: 'Bookstore', icon: 'BK', x: 74, y: 51, roadSide: 'south', nodeId: 'n22', color: '#8f75b5' },
-    { id: 'fire-station', name: 'Fire Station', icon: 'F', x: 8, y: 73, roadSide: 'east', nodeId: 'n03', color: '#d95d5d' },
-    { id: 'mall', name: 'Mall', icon: 'M', x: 44, y: 73, roadSide: 'west', nodeId: 'n23', color: '#46a4a8' },
-    { id: 'department-store', name: 'Department Store', icon: 'DS', x: 68, y: 73, roadSide: 'west', nodeId: 'n33', color: '#cb6f9e' }
-  ]
+    { id: 'police', name: 'Police Station', mark: '★', x: 5.2, y: 10.2, w: 9.2, h: 17.2, form: 'civic', arrivalNodeId: 'police-front', color: '#5877c7' },
+    { id: 'school', name: 'School', mark: 'ABC', x: 15.1, y: 10.2, w: 10.2, h: 17.2, form: 'civic', arrivalNodeId: 'school-front', color: '#e9a83b' },
+    { id: 'bakery', name: 'Bakery', mark: 'B', x: 32.7, y: 12.7, w: 9.4, h: 14.7, form: 'shop', arrivalNodeId: 'bakery-front', color: '#e87867' },
+    { id: 'bookstore', name: 'Bookstore', mark: 'BK', x: 42.7, y: 12.7, w: 9.4, h: 14.7, form: 'shop', arrivalNodeId: 'bookstore-front', color: '#8066ad' },
+    { id: 'park', name: 'Park', mark: '♣', x: 53.2, y: 6.2, w: 15.2, h: 21.2, form: 'park', arrivalNodeId: 'park-front', color: '#5c9d62' },
+    { id: 'restaurant', name: 'Restaurant', mark: 'R', x: 76, y: 12.7, w: 9.4, h: 14.7, form: 'shop', arrivalNodeId: 'restaurant-front', color: '#d76d50' },
+    { id: 'post-office', name: 'Post Office', mark: '✉', x: 86, y: 12.7, w: 9.4, h: 14.7, form: 'shop', arrivalNodeId: 'post-office-front', color: '#4d8bc0' },
+    { id: 'fire-station', name: 'Fire Station', mark: 'F', x: 5.2, y: 46.7, w: 9.6, h: 16.8, form: 'garage', arrivalNodeId: 'fire-station-front', color: '#d95252' },
+    { id: 'mall', name: 'Mall', mark: 'M', x: 15.5, y: 46.7, w: 9.6, h: 16.8, form: 'shop', arrivalNodeId: 'mall-front', color: '#32989d' },
+    { id: 'department-store', name: 'Department Store', mark: 'DS', x: 43.2, y: 46.7, w: 13.6, h: 16.8, form: 'civic', arrivalNodeId: 'department-store-front', color: '#bd648e' }
+  ],
+  edges: []
 };
 
-const arrivalNodes = {
-  park: 'park-front',
-  bakery: 'bakery-front',
-  restaurant: 'restaurant-front',
-  bookstore: 'bookstore-front',
-  'fire-station': 'fire-station-front',
-  mall: 'mall-front',
-  'department-store': 'department-store-front'
-};
-for (const place of cityMap.places) place.arrivalNodeId = arrivalNodes[place.id] || place.nodeId;
-
-const directions = [
-  ['n00','n10','east'],['n10','n20','east'],['n20','park-front','east'],['park-front','n30','east'],
-  ['n01','n11','east'],['n11','n21','east'],['n21','n31','east'],
-  ['n02','n12','east'],['n12','n22','east'],['n22','bookstore-front','east'],['bookstore-front','n32','east'],
-  ['n03','n13','east'],['n13','n23','east'],['n23','n33','east'],
-  ['n00','bakery-front','south'],['bakery-front','n01','south'],['n01','restaurant-front','south'],['restaurant-front','n02','south'],['n02','fire-station-front','south'],['fire-station-front','n03','south'],
-  ['n10','n11','south'],['n11','n12','south'],['n12','mall-front','south'],['mall-front','n13','south'],
-  ['n20','n21','south'],['n21','n22','south'],['n22','department-store-front','south'],['department-store-front','n23','south'],
-  ['n30','n31','south'],['n31','n32','south'],['n32','n33','south']
+const roadPaths = [
+  ['main-west','police-front','school-front','main-market','bakery-front','bookstore-front','park-front','main-park','restaurant-front','post-office-front','main-east'],
+  ['station-west','fire-station-front','mall-front','station-market','bus-west','department-store-front','station-park','bus-east','station-east'],
+  ['market-north','main-market','station-market','market-south'],
+  ['park-north','main-park','station-park','park-south']
 ];
-const opposite = { east: 'west', south: 'north' };
-cityMap.edges = directions.flatMap(([from, to, direction]) => [
-  { from, to, direction, distance: 1 },
-  { from: to, to: from, direction: opposite[direction], distance: 1 }
-]);
+
+const nodesById = new Map(cityMap.nodes.map(node => [node.id, node]));
+const directionBetween = (from, to) => {
+  if (from.x < to.x) return 'east';
+  if (from.x > to.x) return 'west';
+  if (from.y < to.y) return 'south';
+  return 'north';
+};
+
+for (const path of roadPaths) {
+  for (let index = 0; index < path.length - 1; index += 1) {
+    const from = nodesById.get(path[index]);
+    const to = nodesById.get(path[index + 1]);
+    cityMap.edges.push(
+      { from: from.id, to: to.id, direction: directionBetween(from, to) },
+      { from: to.id, to: from.id, direction: directionBetween(to, from) }
+    );
+  }
+}

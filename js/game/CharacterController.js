@@ -6,8 +6,10 @@ export class CharacterController {
     if (intent.action === 'stop') return {ok:true,type:'stop'};
     if (intent.action === 'move') {
       const distance=intent.distance || 1;
-      const path=[];
-      for(let i=0;i<distance;i+=1){ const edge=this.route.forward(this.currentNodeId,this.facing); if(!edge){this.wrongMoves+=1;return {ok:false,type:'invalidMove',path};} this.currentNodeId=edge.to;this.visitedNodes.push(edge.to);path.push(edge.to); }
+      const path=this.route.forwardPath(this.currentNodeId,this.facing,distance,intent.distanceUnit);
+      if(!path){this.wrongMoves+=1;return {ok:false,type:'invalidMove',path:[]};}
+      this.currentNodeId=path[path.length-1];
+      this.visitedNodes.push(...path);
       return {ok:true,type:'move',path};
     }
     return {ok:false,type:'unknown'};

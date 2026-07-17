@@ -267,7 +267,6 @@ assets/
 
 - traffic light
 - stop sign
-- intersection
 
 例如：
 

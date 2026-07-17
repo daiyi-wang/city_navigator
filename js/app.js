@@ -58,25 +58,9 @@ function nextAvailableLevel(currentLevel=state.level){
   return levels.find(item=>item.level>currentLevel&&missions.some(mission=>mission.level===item.level&&(state.mode==='speaking'?mission.mode==='speaking':mission.mode!=='speaking')))?.level??null;
 }
 
-function buildingIcon(placeId){
-  const icons={
-    police:'<path d="M12 25V11l20-8 20 8v14M17 25v31h30V25"/><path d="m32 29 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z"/>',
-    school:'<path d="M8 25 32 8l24 17M13 24v32h38V24M27 56V39h10v17"/><path d="M39 13V3h12l-4 5 4 5Z"/>',
-    park:'<path d="M13 55h38M22 55V38M42 55V34"/><path d="M22 11c-8 0-13 7-9 14-6 5-2 15 7 15h5c9 0 13-10 7-15 3-7-2-14-10-14ZM42 7c-7 0-11 6-8 12-5 5-1 14 7 14h4c8 0 12-9 7-14 2-6-3-12-10-12Z"/>',
-    bakery:'<path d="M9 25h46v31H9zM7 25l5-15h40l5 15"/><path d="M17 25v-6m10 6v-6m10 6v-6m10 6v-6M21 47c0-8 5-13 11-13s11 5 11 13c-7-3-15-3-22 0Z"/>',
-    'post-office':'<path d="M9 17h46v38H9z"/><path d="m11 20 21 18 21-18M11 52l16-18m26 18L37 34"/>',
-    restaurant:'<path d="M16 7v18c0 5 4 8 8 8V57M8 7v12c0 4 3 7 8 7s8-3 8-7V7M44 57V8c8 4 11 15 5 24h-5"/>',
-    bookstore:'<path d="M7 13c10-3 19 0 25 7v37c-6-7-15-10-25-7ZM57 13c-10-3-19 0-25 7v37c6-7 15-10 25-7Z"/><path d="M14 22c5-1 9 1 13 4m-13 7c5-1 9 1 13 4m23-15c-5-1-9 1-13 4m13 7c-5-1-9 1-13 4"/>',
-    'fire-station':'<path d="M8 22h48v34H8zM13 22 32 8l19 14M18 56V32h28v24"/><path d="M27 47c-5-7 2-10 3-17 7 5 10 11 6 17-2 4-7 4-9 0Z"/>',
-    mall:'<path d="M12 20h40l-4 37H16Z"/><path d="M23 25v-8c0-6 4-10 9-10s9 4 9 10v8M23 39h18"/>',
-    'department-store':'<path d="M7 20h50M11 20v36h42V20M6 56h52M14 9h36l7 11H7Z"/><path d="M20 27v21m12-21v21m12-21v21"/>'
-  };
-  return `<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">${icons[placeId]||icons.mall}</svg>`;
-}
-
 function landmarkMarker(type){
   if(type==='trafficLight')return `<span class="landmark landmark-light" aria-label="Traffic light"><svg viewBox="0 0 40 50" aria-hidden="true"><rect x="10" y="2" width="20" height="34" rx="7"/><circle class="light-red" cx="20" cy="10" r="4"/><circle class="light-yellow" cx="20" cy="19" r="4"/><circle class="light-green" cx="20" cy="28" r="4"/><path d="M20 36v10M13 46h14"/></svg></span>`;
-  if(type==='busStop')return `<span class="landmark landmark-bus" aria-label="Bus stop"><svg viewBox="0 0 46 50" aria-hidden="true"><rect x="6" y="3" width="31" height="29" rx="5"/><path d="M11 23h21M13 11h17l2 12H11Zm2 21v7m16-7v7M37 8h4v38M10 46h34"/><circle cx="14" cy="28" r="2"/><circle cx="29" cy="28" r="2"/></svg></span>`;
+  if(type==='busStop')return `<span class="landmark landmark-bus" aria-label="Bus stop"><svg viewBox="0 0 28 48" aria-hidden="true"><rect x="3" y="2" width="22" height="27" rx="4"/><path d="M8 8h12v9H8zM7 22h14M10 29v15m8-15v15M7 44h14"/><circle cx="9" cy="24" r="1.5"/><circle cx="19" cy="24" r="1.5"/></svg></span>`;
   return `<span class="landmark landmark-stop" aria-label="Stop sign"><svg viewBox="0 0 42 50" aria-hidden="true"><path d="m12 3 17 0 10 10v17L29 40H12L2 30V13Z"/><path d="M21 40v7M13 47h16"/></svg></span>`;
 }
 
@@ -86,12 +70,20 @@ function mapView(){
   const destination=route.node(state.mission.destinationNodeId);
   const showDestination=state.mission.mode==='speaking'||state.mission.steps?.some(item=>item.intent.action==='move')||(state.mission.mode==='findPlace'&&state.feedback?.type==='success');
   const angle={north:0,east:90,south:180,west:270}[character.facing];
-  const hRoads=[17,39,61,83].map(y=>`<div class="road h" style="top:${y}%"></div>`).join('');
-  const vRoads=[14,38,62,86].map(x=>`<div class="road v" style="left:${x}%"></div>`).join('');
-  const nodes=cityMap.nodes.map(node=>`${node.type==='arrival'?(node.id===state.mission.destinationNodeId?`<span class="arrival-node" style="left:${node.x}%;top:${node.y}%" aria-hidden="true"></span>`:''):`<span class="node" style="left:${node.x}%;top:${node.y}%" aria-hidden="true"></span>`}${node.landmark?`<span class="landmark-position" style="left:${node.x-2.4}%;top:${node.y-3.2}%">${landmarkMarker(node.landmark)}</span>`:''}`).join('');
-  const places=cityMap.places.map(place=>`<button class="place place-road-${place.roadSide} ${state.mission.mode==='findPlace'?'selectable':''} ${place.id===state.mission.targetPlaceId&&state.feedback?.type==='success'?'target':''} ${state.mission.mode==='findPlace'&&state.hintLevel>=2&&place.id===state.mission.relation?.referencePlaceId?'reference':''}" style="left:${place.x}%;top:${place.y}%;--place-color:${place.color}" data-place="${place.id}" aria-label="${place.name}" ${state.mission.mode==='findPlace'?'':`tabindex="-1" aria-hidden="true"`}><span class="place-icon">${buildingIcon(place.id)}</span><span class="place-name">${place.name}</span></button>`).join('');
-  const segments=state.visitedSegments.map(segment=>{const a=route.node(segment.from),b=route.node(segment.to);const dx=b.x-a.x,dy=b.y-a.y;const length=Math.sqrt(dx*dx+dy*dy);const angle=Math.atan2(dy,dx)*180/Math.PI;return `<span class="route-segment" style="left:${a.x}%;top:${a.y}%;width:${length}%;transform:rotate(${angle}deg)"></span>`;}).join('');
-  return `<section class="map-card"><div class="map-header"><h2>Sunny Town</h2><span class="compass">N ↑ · Facing ${character.facing}${state.mission.targetFacing?` · Target ${state.mission.targetFacing}`:''}</span></div><div class="city-map" aria-label="Sunny Town 城市地圖，人物目前面向 ${character.facing}">${hRoads}${vRoads}${nodes}${places}${segments}<span class="start-marker" style="left:${start.x}%;top:${start.y}%">START</span>${showDestination?`<span class="destination-marker" style="left:${destination.x}%;top:${destination.y}%">GOAL</span>`:''}<div class="character ${state.moving?'walking':''} ${state.feedback?.type==='success'&&!state.missionComplete&&state.lastAction!=='turn'?'success':''}" style="left:${current.x}%;top:${current.y}%" aria-label="人物位於 ${current.id}，面向 ${character.facing}"><div class="character-body" style="transform:rotate(${angle}deg)">☺</div></div></div></section>`;
+  const roads=cityMap.roads.map(road=>`<div class="road ${road.axis}" style="--position:${road.position}%"><span class="street-label">${escapeHTML(road.label)}</span></div>`).join('');
+  const districts=['northwest','north','northeast','west','center','east','southwest','south','southeast'].map(name=>`<span class="map-district map-district--${name}" aria-hidden="true"></span>`).join('');
+  const decorations=`<span class="map-lot map-lot--garden" aria-hidden="true"><b>Community garden</b></span><span class="map-lot map-lot--square" aria-hidden="true"><b>Town square</b></span><span class="map-lot map-lot--field" aria-hidden="true"><b>Sports field</b></span><span class="crosswalk crosswalk--a" aria-hidden="true"></span><span class="crosswalk crosswalk--b" aria-hidden="true"></span>`;
+  const nodes=cityMap.nodes.map(node=>`${node.type==='buildingEntrance'?(node.id===state.mission.destinationNodeId?`<span class="arrival-node" style="left:${node.x}%;top:${node.y}%" aria-hidden="true"></span>`:''):(node.blockBoundary?`<span class="node" style="left:${node.x}%;top:${node.y}%" aria-hidden="true"></span>`:'')}${node.landmark?`<span class="landmark-position" style="left:${node.x+(node.markerOffset?.x||0)}%;top:${node.y+(node.markerOffset?.y||0)}%">${landmarkMarker(node.landmark)}</span>`:''}`).join('');
+  const referenceIds=new Set([state.mission.relation?.referencePlaceId,...(state.mission.relation?.referencePlaceIds||[])].filter(Boolean));
+  const places=cityMap.places.map(place=>`<button class="place place--${place.form} ${state.mission.mode==='findPlace'?'selectable':''} ${place.id===state.mission.targetPlaceId&&state.feedback?.type==='success'?'target':''} ${state.mission.mode==='findPlace'&&state.hintLevel>=2&&referenceIds.has(place.id)?'reference':''}" style="left:${place.x}%;top:${place.y}%;width:${place.w}%;height:${place.h}%;--place-color:${place.color}" data-place="${place.id}" aria-label="${place.name}" ${state.mission.mode==='findPlace'?'':`tabindex="-1" aria-hidden="true"`}><span class="place-art" aria-hidden="true"><span class="place-roof"></span><span class="place-facade"><i></i><i></i><i></i><i></i><b>${escapeHTML(place.mark)}</b></span></span><span class="place-name">${escapeHTML(place.name)}</span></button>`).join('');
+  const segments=state.visitedSegments.map(segment=>{
+    const a=route.node(segment.from),b=route.node(segment.to);
+    if(a.y===b.y){
+      return `<span class="route-segment route-segment--horizontal" style="left:${Math.min(a.x,b.x)}%;top:${a.y}%;width:${Math.abs(b.x-a.x)}%"></span>`;
+    }
+    return `<span class="route-segment route-segment--vertical" style="left:${a.x}%;top:${Math.min(a.y,b.y)}%;height:${Math.abs(b.y-a.y)}%"></span>`;
+  }).join('');
+  return `<section class="map-card"><div class="map-header"><h2>Sunny Town</h2><span class="compass">N ↑ · Facing ${character.facing}${state.mission.targetFacing?` · Target ${state.mission.targetFacing}`:''}</span></div><div class="city-map" aria-label="Sunny Town 城市地圖，人物目前面向 ${character.facing}">${districts}${roads}${decorations}${nodes}${places}${segments}<span class="start-marker" style="left:${start.x}%;top:${start.y}%">START</span>${showDestination?`<span class="destination-marker" style="left:${destination.x}%;top:${destination.y}%">GOAL</span>`:''}<div class="character ${state.moving?'walking':''} ${state.feedback?.type==='success'&&!state.missionComplete&&state.lastAction!=='turn'?'success':''}" style="left:${current.x}%;top:${current.y}%" aria-label="人物位於 ${current.id}，面向 ${character.facing}"><div class="character-body" style="transform:rotate(${angle}deg)">☺</div></div></div></section>`;
 }
 
 function feedbackView(){
@@ -112,7 +104,9 @@ function controlView(){
   const directionButtons=`<button class="action-btn" data-command="move:straight" ${disabled}><span class="symbol">↑</span>Go Straight</button><button class="action-btn" data-command="stop:stop" ${disabled}><span class="symbol">■</span>Stop</button><button class="action-btn" data-command="turn:left" ${disabled}><span class="symbol">↰</span>Turn Left</button><button class="action-btn" data-command="turn:right" ${disabled}><span class="symbol">↱</span>Turn Right</button>`;
   const speakingMain=`<div class="free-route-card"><span class="instruction-label">Your route</span><strong>Choose your own way to the goal.</strong><p>Say one direction at a time. Any valid route is correct.</p></div><div class="control-grid"><button class="mic-btn ${state.listening?'listening':''}" data-action="listen" ${state.listening?'disabled':''}>${state.listening?'● Listening…':'● Start Speaking'}</button>${state.transcript?`<div class="instruction-card" style="grid-column:1/-1"><span class="instruction-label">I heard</span><span class="instruction-text">“${escapeHTML(state.transcript)}”</span></div>`:''}${directionButtons}</div>`;
   const main=mission.mode==='speaking'?speakingMain:mission.mode==='findPlace'?`<div class="instruction-card ${captionVisible?'':'hidden-text'}"><span class="instruction-label">Listening clue</span><span class="instruction-text">${escapeHTML(instruction)}</span></div><div class="control-grid"><button class="play-btn" data-action="play">▶ Play listening clue</button></div><p class="mission-goal">Listen to the position words, then tap the correct building. The answer name is not spoken.</p>`:`<div class="instruction-card ${captionVisible?'':'hidden-text'}"><span class="instruction-label">Current instruction</span><span class="instruction-text">${escapeHTML(instruction)}</span></div><div class="control-grid"><button class="play-btn" data-action="play">▶ Play instruction</button>${directionButtons}</div>`;
-  return `<aside class="control-panel"><div class="mission-kicker"><span>MISSION ${state.sessionIndex+1}</span><span>LEVEL ${mission.level}</span></div><h1 class="mission-title">${escapeHTML(mission.title)}</h1><p class="mission-goal">${mission.mode==='speaking'?'Reach the goal using a route you choose.':mission.mode==='findPlace'?'Listen to the location clue and find the building.':'Follow each clue and use landmarks to reach the building.'}</p>${destinationCopy}<div class="step-dots" aria-label="任務步驟進度">${dots}</div>${main}${feedbackView()}<div class="minor-actions">${mission.mode==='listening'?'<button data-action="replay">↻ Listen Again</button>':''}<button data-action="hint">✦ Hint ${state.hintLevel}/4</button></div>${mission.mode==='speaking'&&!recognition.supported()?'<p class="mission-goal" role="status">This browser cannot use speech recognition. Use the direction buttons instead.</p>':''}</aside>`;
+  const listeningGoal={1:'Listen, then perform one basic action.',2:'Use the named traffic light or stop sign.',4:'Follow the short route one step at a time.',5:'Follow the full route using blocks and landmarks.'}[mission.level]||'Follow each clue to the destination.';
+  const missionGoal=mission.mode==='speaking'?'Reach the goal using a route you choose.':mission.mode==='findPlace'?'Listen to the location clue and find the building.':listeningGoal;
+  return `<aside class="control-panel"><div class="mission-kicker"><span>MISSION ${state.sessionIndex+1}</span><span>LEVEL ${mission.level}</span></div><h1 class="mission-title">${escapeHTML(mission.title)}</h1><p class="mission-goal">${missionGoal}</p>${destinationCopy}<div class="step-dots" aria-label="任務步驟進度">${dots}</div>${main}${feedbackView()}<div class="minor-actions">${mission.mode==='listening'?'<button data-action="replay">↻ Listen Again</button>':''}<button data-action="hint">✦ Hint ${state.hintLevel}/4</button></div>${mission.mode==='speaking'&&!recognition.supported()?'<p class="mission-goal" role="status">This browser cannot use speech recognition. Use the direction buttons instead.</p>':''}</aside>`;
 }
 
 function gameView(){return `<div class="game-shell">${mapView()}${controlView()}</div>`;}
@@ -156,7 +150,7 @@ const tutorialPages=[
 function tutorialModal(){const page=tutorialPages[state.tutorialStep];return `<div class="modal-backdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="tutorial-title"><span class="eyebrow" style="color:var(--teal)">Quick tutorial ${state.tutorialStep+1}/${tutorialPages.length}</span><h1 id="tutorial-title" class="screen-title">${page.title}</h1><div class="tutorial-visual" aria-hidden="true">${page.icon}</div><p class="screen-lead">${page.text}</p><div class="dots">${tutorialPages.map((_,i)=>`<i class="${i===state.tutorialStep?'active':''}"></i>`).join('')}</div><div class="button-row"><button class="secondary-btn" data-action="skip-tutorial">Skip</button><button class="primary-btn" data-action="next-tutorial">${state.tutorialStep===tutorialPages.length-1?'Start exploring':'Next'}</button></div></section></div>`;}
 
 function selectMode(mode){state.mode=mode;if(mode==='speaking'&&!state.settings.speechEnabled){state.returnScreen='home';state.screen='settings';render();return;}state.screen='modeSelection';render();}
-function startSession(level,customMissions=null){state.level=level;let pool=customMissions||missions.filter(item=>item.level===level&&(state.mode==='speaking'?item.mode==='speaking':item.mode!=='speaking'));state.session=pool.slice(0,3);if(!state.session.length){state.screen='home';render();return;}state.sessionIndex=0;state.sessionResults=[];state.screen='game';loadMission();}
+function startSession(level,customMissions=null){state.level=level;let pool=customMissions||missions.filter(item=>item.level===level&&(state.mode==='speaking'?item.mode==='speaking':item.mode!=='speaking'));state.session=[...pool];if(!state.session.length){state.screen='home';render();return;}state.sessionIndex=0;state.sessionResults=[];state.screen='game';loadMission();}
 function loadMission(){state.mission=state.session[state.sessionIndex];state.stepIndex=0;state.commandProgress=0;state.feedback=null;state.hintLevel=0;state.showCaption=false;state.transcript='';state.busy=false;state.moving=false;state.lastAction=null;state.missionComplete=false;state.visitedSegments=[];scorer.reset();character.reset(state.mission.startNodeId,state.mission.startFacing);render();if(state.settings.autoPlay&&state.mission.mode==='listening')setTimeout(()=>playInstruction(false),250);}
 function intentsMatch(actual,expected){return actual&&actual.action===expected.action&&(expected.direction?actual.direction===expected.direction:true);}
 
@@ -209,8 +203,7 @@ function handleFreeNavigation(intent,fromFallback=false){
   if(!['move','turn'].includes(intent.action)){registerError(state.mission.title,'Say a direction such as go straight, turn left, or turn right.');return;}
   const distance=intent.action==='move'?Math.max(1,Number(intent.distance)||1):0;
   if(intent.action==='move'){
-    let nodeId=character.currentNodeId;
-    for(let index=0;index<distance;index+=1){const edge=route.forward(nodeId,character.facing);if(!edge){registerError(state.mission.title,'That road does not continue ahead. Choose another direction.');return;}nodeId=edge.to;}
+    if(!route.forwardPath(character.currentNodeId,character.facing,distance,intent.distanceUnit)){registerError(state.mission.title,'That road does not continue ahead. Choose another direction.');return;}
   }
   const before=character.currentNodeId;
   const facingBefore=character.facing;
@@ -260,16 +253,45 @@ function selectPlace(placeId){if(state.mission.mode!=='findPlace')return;if(plac
 function playInstruction(countReplay=true){const item=state.mission.mode==='findPlace'?state.mission.instruction:state.mission.steps?.[state.stepIndex]?.instruction;if(!item)return;if(countReplay){const limit=state.settings.replays;if(limit!=='unlimited'&&scorer.replays>=Number(limit)){state.feedback={type:'error',title:'Replay limit reached',message:'Use a hint or make your best choice.'};render();return;}scorer.replays+=1;}const ok=speech.speak(item,{slow:state.settings.speed==='slow'});if(!ok){state.feedback={type:'error',title:'Voice unavailable',message:'Read the hint or continue with the buttons.'};render();}}
 function showHint(){
   if(state.mission.mode==='speaking'){
-    scorer.hints+=1;state.hintLevel=Math.min(4,state.hintLevel+1);
+    scorer.hints+=1;
+    state.hintLevel=Math.min(4,state.hintLevel+1);
     const hints=['Check which way the navigator is facing.','Find the GOAL and choose any connected road.','Use short commands: go straight, turn left, or turn right.','A longer route is okay if it reaches the GOAL.'];
-    state.feedback={type:'error',title:`Planning hint ${state.hintLevel}`,message:hints[state.hintLevel-1]};announce(state.feedback.title+' '+state.feedback.message);render();return;
+    state.feedback={type:'error',title:`Planning hint ${state.hintLevel}`,message:hints[state.hintLevel-1]};
+    announce(state.feedback.title+' '+state.feedback.message);render();return;
   }
-  scorer.hints+=1;state.hintLevel=Math.min(4,state.hintLevel+1);const isPlace=state.mission.mode==='findPlace';const expected=isPlace?{instruction:state.mission.instruction,intent:{}}:state.mission.steps[state.stepIndex];const relation=state.mission.relation?.type==='nextTo'?'next to':'across from';const reference=cityMap.places.find(place=>place.id===state.mission.relation?.referencePlaceId)?.name;const landmarkName={trafficLight:'traffic light',busStop:'bus stop',stopSign:'stop sign'}[expected.intent.landmarkType];const hints=isPlace?[`Listen for “${relation}”.`,`Find ${reference}, then check the place ${relation} it.`,expected.instruction.replace(new RegExp(relation,'i'),'___'),expected.instruction]:[expected.intent.direction?`Listen for “${expected.intent.direction}”.`:'Look carefully at the place names.',landmarkName?`Look for the ${landmarkName}.`:'Use the goal marker on the map.',expected.instruction.replace(/left|right|straight|stop/i,'___'),expected.instruction];state.feedback={type:'error',title:`Hint ${state.hintLevel}`,message:hints[state.hintLevel-1]};if(state.hintLevel>=3)state.showCaption=true;if(state.hintLevel===4)speech.speak(expected.instruction,{slow:true});announce(state.feedback.title+' '+state.feedback.message);render();
+
+  scorer.hints+=1;
+  state.hintLevel=Math.min(4,state.hintLevel+1);
+  const isPlace=state.mission.mode==='findPlace';
+  const expected=isPlace?{instruction:state.mission.instruction,intent:{}}:state.mission.steps[state.stepIndex];
+  let hints;
+  if(isPlace){
+    const type=state.mission.relation?.type;
+    const relation={leftOfTraveler:'on your left',rightOfTraveler:'on your right',acrossFrom:'across from',nextTo:'next to',between:'between'}[type]||'near';
+    const referenceIds=[state.mission.relation?.referencePlaceId,...(state.mission.relation?.referencePlaceIds||[])].filter(Boolean);
+    const references=referenceIds.map(id=>cityMap.places.find(place=>place.id===id)?.name).filter(Boolean);
+    const mapHint=type==='leftOfTraveler'||type==='rightOfTraveler'
+      ?`Check which way the navigator is facing, then look ${relation.replace('on your ','')}.`
+      :type==='between'
+        ?`Find ${references[0]} and ${references[1]}; the answer is in the middle.`
+        :`Find ${references[0]}, then check the place ${relation} it.`;
+    hints=[`Listen for “${relation}”.`,mapHint,expected.instruction.replace(new RegExp(relation,'i'),'___'),expected.instruction];
+  }else{
+    const landmarkName={trafficLight:'traffic light',busStop:'bus stop',stopSign:'stop sign'}[expected.intent.landmarkType];
+    hints=[expected.intent.direction?`Listen for “${expected.intent.direction}”.`:'Look carefully at the place names.',landmarkName?`Look for the ${landmarkName}.`:'Use the GOAL marker on the map.',expected.instruction.replace(/left|right|straight|stop/i,'___'),expected.instruction];
+  }
+  state.feedback={type:'error',title:`Hint ${state.hintLevel}`,message:hints[state.hintLevel-1]};
+  if(state.hintLevel>=3)state.showCaption=true;
+  if(state.hintLevel===4)speech.speak(expected.instruction,{slow:true});
+  announce(state.feedback.title+' '+state.feedback.message);render();
 }
 
 async function listen(){if(!recognition.supported()){state.feedback={type:'error',title:'Microphone unavailable',message:'Use the direction buttons instead.'};scorer.usedFallback=true;render();return;}state.listening=true;state.feedback={type:'success',title:'Listening…',message:'Say one direction in English.'};render();try{const text=await recognition.listen();state.listening=false;state.transcript=text;const intent=parser.parse(text);if(!intent){state.feedback={type:'error',title:'I couldn’t hear you clearly.',message:'Please try again. You can also use the buttons.'};render();return;}handleCommand(intent,false);}catch(error){state.listening=false;state.feedback={type:'error',title:'I couldn’t hear you clearly.',message:'Please try again, or use the buttons instead.'};render();}}
 function completeMission(){
-  const mission=state.mission;const expectedTotal=mission.steps?.length||1;const result={id:mission.id,mode:mission.mode==='speaking'?'speaking':'listening',stars:scorer.stars(),correct:expectedTotal,total:expectedTotal+scorer.errors,hints:scorer.hints,replays:scorer.replays,mistakes:scorer.errors||scorer.hints>=4?[mission.instruction||mission.steps?.[Math.min(state.stepIndex,mission.steps.length-1)]?.instruction||mission.title]:[]};storage.record(result);state.sessionResults.push(result);if(state.sessionIndex<state.session.length-1){state.missionComplete=true;render();announce(`Mission ${state.sessionIndex+1} complete. ${mission.targetFacing?`Now facing ${character.facing}.`:'You reached the goal.'}`);}else{state.screen='results';render();announce('Great job! Route complete.');}}
+  const mission=state.mission;
+  if(character.currentNodeId!==mission.destinationNodeId){registerError(mission.title,'Follow the route all the way to the destination.');return;}
+  if(mission.targetFacing&&character.facing!==mission.targetFacing){registerError(mission.title,`Finish facing ${mission.targetFacing}.`);return;}
+  const expectedTotal=mission.steps?.length||1;const result={id:mission.id,mode:mission.mode==='speaking'?'speaking':'listening',stars:scorer.stars(),correct:expectedTotal,total:expectedTotal+scorer.errors,hints:scorer.hints,replays:scorer.replays,mistakes:scorer.errors||scorer.hints>=4?[mission.instruction||mission.steps?.[Math.min(state.stepIndex,mission.steps.length-1)]?.instruction||mission.title]:[]};storage.record(result);state.sessionResults.push(result);if(state.sessionIndex<state.session.length-1){state.missionComplete=true;render();announce(`Mission ${state.sessionIndex+1} complete. ${mission.targetFacing?`Now facing ${character.facing}.`:'You reached the goal.'}`);}else{state.screen='results';render();announce('Great job! Route complete.');}}
 function practiceMistakes(){const data=storage.load();const phrases=Object.keys(data.wrongPatterns);const pool=missions.filter(m=>phrases.some(phrase=>m.instruction===phrase||m.steps?.some(s=>s.instruction===phrase)));if(!pool.length){state.feedback=null;state.screen='home';render();announce('No mistakes to practice yet.');return;}state.mode=pool[0].mode==='speaking'?'speaking':'listening';startSession(pool[0].level,pool.slice(0,3));}
 function playTone(success){if(!state.settings.sound)return;try{const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext)return;const ctx=new AudioContext();const osc=ctx.createOscillator(),gain=ctx.createGain();osc.frequency.value=success?660:260;gain.gain.setValueAtTime(.06,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.16);osc.connect(gain).connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+.16);}catch{}}
 
